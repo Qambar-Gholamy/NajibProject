@@ -23,7 +23,6 @@
     "html-to-text": "^9.0.5",
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.2",
-    "mapbox": "^1.0.0-beta10",
     "mongoose": "^8.19.1",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
