@@ -2,10 +2,12 @@ const express = require('express');
 const cors= require('cors');
 const audioRoutes = require('./routes/audioRoute');
 const userRouter = require('./routes/userRoutes.js');
-const AppError = require('./utils/AppError.js');
 
 const app = express();
 app.use(cors());
+app.get('/', (req, res) => {
+  res.send('API is running');
+});
 // Move audio routes BEFORE json parser to allow multer multipart processing
 app.use('/api/audio', audioRoutes);
 app.use(express.json());
@@ -38,12 +40,10 @@ app.use('/api/users', userRouter);
 
 /* --------------------------- 8) 404 HANDLER --------------------------------- */
 app.all(/.*/, (req, res, next) => {
-  console.log('req is ',req);
   const message =
     process.env.NODE_ENV === 'development'
       ? `Can not find ${req.originalUrl} on this server!`
       : 'Resource not found!';
-  next(new AppError(message, 404));
 });
 
 module.exports = app;
