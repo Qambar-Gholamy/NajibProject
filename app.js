@@ -3,7 +3,6 @@ const cors= require('cors');
 const audioRoutes = require('./routes/audioRoute');
 const userRouter = require('./routes/userRoutes.js');
 const AppError = require('./utils/AppError.js');
-const globalErrorController = require('./controllers/errorController.js');
 
 const app = express();
 app.use(cors());
@@ -46,8 +45,5 @@ app.all(/.*/, (req, res, next) => {
       : 'Resource not found!';
   next(new AppError(message, 404));
 });
-
-/* ------------------------- 9) GLOBAL ERROR HANDLER -------------------------- */
-app.use(globalErrorController);
 
 module.exports = app;
