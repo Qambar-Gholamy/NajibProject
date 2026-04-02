@@ -20,7 +20,7 @@ const getAllAudios = async () => {
   const result = await cloudinary.api.resources({
     resource_type: 'video',
     type: 'upload',
-    max_results: 500,
+    max_results: 2000,
   });
 
   return result.resources
