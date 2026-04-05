@@ -1,3 +1,4 @@
+const path = require('path');
 const {
   uploadAudio,
   uploadBulkAudio,
@@ -11,7 +12,6 @@ const cloudinary = require('../utils/cloudinary');
 const getAudioList = catchAsync(async (req, res, next) => {
   try {
     const data = await getAllAudios();
-
     res.status(200).json({
       success: true,
       count: data.length,
@@ -29,25 +29,20 @@ const getAudioList = catchAsync(async (req, res, next) => {
 const uploadAudioHandler = catchAsync(async (req, res, next) => {
   try {
     const { file } = req;
-    const { index } = req.body;
 
     if (!file) {
       return res.status(400).json({ message: 'File is required' });
     }
 
-    if (!index) {
-      return res.status(400).json({ message: 'Index is required' });
-    }
+    const {name} = path.parse(file.originalname);
+    const publicId = `sounds/${name}`;
 
-    const result = await uploadAudio(file.buffer, index);
+    const result = await uploadAudio(file.buffer, publicId);
 
     res.status(201).json({
       success: true,
       publicId: result.public_id,
-      url: cloudinary.url(result.public_id, {
-      resource_type: 'video',
-      secure: true,
-      }),
+      url: result.secure_url,
     });
 
   } catch (err) {
@@ -62,7 +57,6 @@ const uploadAudioHandler = catchAsync(async (req, res, next) => {
 const bulkUploadAudioHandler = catchAsync(async (req, res, next) => {
   try {
     const { files } = req;
-    const { startIndex = 1 } = req.body;
 
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -76,7 +70,12 @@ const bulkUploadAudioHandler = catchAsync(async (req, res, next) => {
       });
     }
 
-    const results = await uploadBulkAudio(files, Number(startIndex));
+    const publicIds = files.map(file => {
+      const {name} = path.parse(file.originalname);
+      return `sounds/${name}`;
+    });
+
+    const results = await uploadBulkAudio(files, publicIds);
 
     res.status(201).json({
       success: true,

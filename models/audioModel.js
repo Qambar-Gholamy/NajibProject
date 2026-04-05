@@ -6,7 +6,6 @@ const uploadAudio = (buffer, publicId) =>
       {
         resource_type: 'video',
         public_id: publicId,
-        overwrite: true,
       },
       (error, result) => {
         if (error) return reject(error);
@@ -28,43 +27,36 @@ const getAllAudios = async () => {
     .map((r, i) => ({
       id: `audio_${String(i + 1).padStart(2, '0')}`,
       publicId: r.public_id,
-       url: cloudinary.url(r.public_id, {
-          resource_type: 'video',
-          secure: true,
-      }),
+      url: r.secure_url,
     }));
 };
 
 // bulk upload
-const uploadBulkAudio = async (files, startIndex = 1) => {
+const uploadBulkAudio = async (files, publicIds) => {
   const results = [];
 
   // ⚠️ sequential to avoid rate limit
-    // eslint-disable-unary-operator
-  for (let i = 0; i < files.length; i += 1) {
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const index = startIndex + i;
-
-    const publicId = `sounds/audio_${String(index).padStart(2, '0')}`;
+    const publicId = publicIds[i];
 
     try {
-        // eslint-disable-next-line no-await-in-loop
+      // eslint-disable-next-line no-await-in-loop
       const res = await uploadAudio(file.buffer, publicId);
 
       results.push({
         success: true,
-        index,
+        index: i + 1,
         publicId: res.public_id,
-        url: cloudinary.url(res.public_id, {
-        resource_type: 'video',
-        secure: true,
-         }),
+        unique_filename: true,
+        overwrite: false,
+        url: res.secure_url,
       });
-
     } catch (error) {
       results.push({
         success: false,
-        index,
+        index: i + 1,
         error: error.message,
       });
     }
