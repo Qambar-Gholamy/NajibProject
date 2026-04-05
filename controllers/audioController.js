@@ -78,7 +78,6 @@ const bulkUploadAudioHandler = catchAsync(async (req, res, next) => {
     const results = await uploadBulkAudio(files, publicIds);
 
     res.status(201).json({
-      success: true,
       total: files.length,
       uploaded: results.filter(r => r.success).length,
       failed: results.filter(r => !r.success).length,
