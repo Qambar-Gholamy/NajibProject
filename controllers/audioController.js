@@ -40,7 +40,6 @@ const uploadAudioHandler = catchAsync(async (req, res, next) => {
     const result = await uploadAudio(file.buffer, publicId);
 
     res.status(201).json({
-      success: true,
       publicId: result.public_id,
       url: result.secure_url,
     });

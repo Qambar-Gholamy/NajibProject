@@ -46,11 +46,8 @@ const uploadBulkAudio = async (files, publicIds) => {
       const res = await uploadAudio(file.buffer, publicId);
 
       results.push({
-        success: true,
         index: i + 1,
         publicId: res.public_id,
-        unique_filename: true,
-        overwrite: false,
         url: res.secure_url,
       });
     } catch (error) {
