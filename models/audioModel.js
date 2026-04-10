@@ -15,21 +15,39 @@ const uploadAudio = (buffer, publicId) =>
 
     stream.end(buffer);
   });
-const getAllAudios = async () => {
-  const result = await cloudinary.api.resources({
+const getAllAudios = async ({ cursor = null, limit = 100, prefix = 'sounds/' } = {}) => {
+  // Basic validation
+  if (limit > 1000 || limit < 1) throw new Error('Limit must be between 1 and 1000');
+  if (cursor && typeof cursor !== 'string') throw new Error('Cursor must be a string');
+
+  const params = {
     resource_type: 'video',
     type: 'upload',
-    max_results: 2000,
-  });
+    max_results: Math.min(limit, 1000),
+    total_count: true,
+    prefix: prefix.endsWith('/') ? prefix : `${prefix}/`,
+  };
+  if (cursor) {
+    params.next_cursor = cursor;
+  }
 
-  return result.resources
-    .sort((a, b) => a.public_id.localeCompare(b.public_id))
-    .map((r, i) => ({
-      id: `audio_${String(i + 1).padStart(2, '0')}`,
-      publicId: r.public_id,
-      url: r.secure_url,
-    }));
+  const result = await cloudinary.api.resources(params);
+
+  // Stable ID from public_id basename
+  const audios = result.resources.map((r) => ({
+    id: r.public_id.split('/').pop().replace(/[^a-zA-Z0-9]/g, '_'),
+    publicId: r.public_id,
+    url: r.secure_url,
+  }));
+
+  return {
+    audios,
+    nextCursor: result.next_cursor,
+    hasMore: !!result.next_cursor,
+    totalCount: result.total_count || 0,
+  };
 };
+
 
 // bulk upload
 const uploadBulkAudio = async (files, publicIds) => {
